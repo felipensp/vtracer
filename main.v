@@ -39,7 +39,6 @@ fn main() {
 		syscall_tracing: true
 		syscall_hook: syscall_hook
 	}
-	vtracer.init()
 	mut args := unsafe { [2]&char{} }
 	args[0] = if os.args.len > 2 { os.args[2].str } else { &char(''.str) }
 	args[1] = unsafe { nil }

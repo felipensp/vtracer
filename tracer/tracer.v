@@ -34,9 +34,6 @@ mut:
 	syscall_hook    fn (int, UserRegs) = unsafe { nil }
 }
 
-pub fn (mut p Ptracer) init() {
-}
-
 pub fn (p &Ptracer) trace_me() i64 {
 	return C.ptrace(ptrace_traceme, 0, unsafe { nil }, unsafe { nil })
 }
