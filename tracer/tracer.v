@@ -4,17 +4,6 @@ module tracer
 #include <unistd.h>
 #include <sys/user.h>
 
-const ptrace_o_exitkill = 0x00100000
-
-const ptrace_traceme = 0
-const ptrace_cont = 7
-const ptrace_kill = 8
-const ptrace_getregs = 12
-const ptrace_attach = 16
-const ptrace_detach = 17
-const ptrace_syscall = 24
-const ptrace_setoptions = 0x4200
-
 struct C.user_regs_struct {
 pub:
 	orig_rax i64
@@ -49,33 +38,33 @@ pub fn (mut p Ptracer) init() {
 }
 
 pub fn (p &Ptracer) trace_me() i64 {
-	return C.ptrace(tracer.ptrace_traceme, 0, unsafe { nil }, unsafe { nil })
+	return C.ptrace(ptrace_traceme, 0, unsafe { nil }, unsafe { nil })
 }
 
 pub fn (p &Ptracer) set_options(pid int, option u64) i64 {
-	return C.ptrace(tracer.ptrace_setoptions, pid, unsafe { nil }, option)
+	return C.ptrace(ptrace_setoptions, pid, unsafe { nil }, option)
 }
 
 pub fn (p &Ptracer) attach(pid int) i64 {
-	return C.ptrace(tracer.ptrace_attach, pid, unsafe { nil }, unsafe { nil })
+	return C.ptrace(ptrace_attach, pid, unsafe { nil }, unsafe { nil })
 }
 
 pub fn (p &Ptracer) dettach(pid int) i64 {
-	return C.ptrace(tracer.ptrace_detach, pid, unsafe { nil }, unsafe { nil })
+	return C.ptrace(ptrace_detach, pid, unsafe { nil }, unsafe { nil })
 }
 
 pub fn (p &Ptracer) syscall(pid int) i64 {
-	return C.ptrace(tracer.ptrace_syscall, pid, unsafe { nil }, unsafe { nil })
+	return C.ptrace(ptrace_syscall, pid, unsafe { nil }, unsafe { nil })
 }
 
 pub fn (p &Ptracer) get_regs(pid int) C.user_regs_struct {
 	mut regs := C.user_regs_struct{}
-	C.ptrace(tracer.ptrace_getregs, pid, unsafe { nil }, &regs)
+	C.ptrace(ptrace_getregs, pid, unsafe { nil }, &regs)
 	return regs
 }
 
 pub fn (p &Ptracer) cont(pid int, signo int) i64 {
-	return C.ptrace(tracer.ptrace_cont, pid, 0, signo)
+	return C.ptrace(ptrace_cont, pid, 0, signo)
 }
 
 pub fn (mut p Ptracer) trace(file string, args &&char) int {
@@ -115,21 +104,20 @@ pub fn (mut p Ptracer) loop(child int) {
 	mut status := 0
 	mut in_call := 0
 
-	p.set_options(child, tracer.ptrace_o_exitkill)
+	p.set_options(child, ptrace_o_exitkill)
 
 	for {
 		p.syscall(child)
 		C.wait(&status)
-		if (status & 0xff) != 0x7f { // WIFSTOPPED
+		if wifstopped(status) {
 			break
 		}
-		signo := ((status & 0xff00) >> 8) // WSTOPSIG
-		match signo {
+		match wstopsig(status) {
 			1,  // SIGHUP
 			11,  // SIGSEGV
 			2 // SIGINT
 			{
-				p.cont(child, signo)
+				p.cont(child, wstopsig(status))
 				exit(1)
 			}
 			5 // SIGTRAP (syscall entry, syscall exit, child calls exec)
