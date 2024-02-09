@@ -5,51 +5,55 @@ This project aims to provide an interface to who want write a tracing tool using
 
 The `main.v` is a sample how to use the wrapper.
 
+### Building
+
+`$ v .`
+
 ### Using the vtracer
 
 ```
 $ ./vtracer /bin/date
 [+] starting and tracing `/bin/date`
 execve(0) = 0
-brk(0) = 140737331785728
-access(140243350401792) = -2
+brk(0) = 140737064759296
+access(140639249576704) = -2
 openat(4294967196) = 3
 fstat(3) = 0
-mmap(0) = 140243350171648
+mmap(0) = 140639249346560
 close(3) = 0
 openat(4294967196) = 3
 read(3) = 832
 fstat(3) = 0
-mmap(0) = 140243350454272
-mmap(0) = 140243348291584
-mprotect(140243348430848) = 0
-mmap(140243348430848) = 140243348430848
-mmap(140243349770240) = 140243349770240
-mmap(140243350085632) = 140243350085632
-mmap(140243350110208) = 140243350110208
+mmap(0) = 140639249301504
+mmap(0) = 140639247466496
+mprotect(140639247605760) = 0
+mmap(140639247605760) = 140639247605760
+mmap(140639248945152) = 140639248945152
+mmap(140639249260544) = 140639249260544
+mmap(140639249285120) = 140639249285120
 close(3) = 0
 arch_prctl(4098) = 0
-mprotect(140243350085632) = 0
-mprotect(140243350597632) = 0
-mprotect(140243350417408) = 0
-munmap(140243350171648) = 0
-brk(0) = 140737331785728
-brk(140737331920896) = 140737331920896
+mprotect(140639249260544) = 0
+mprotect(140639249739776) = 0
+mprotect(140639249592320) = 0
+munmap(140639249346560) = 0
+brk(0) = 140737064759296
+brk(140737064894464) = 140737064894464
 openat(4294967196) = 3
 fstat(3) = 0
-mmap(0) = 140243345256448
+mmap(0) = 140639244431360
 close(3) = 0
 clock_gettime(0) = 0
 openat(4294967196) = 3
 fstat(3) = 0
 fstat(3) = 0
 read(3) = 512
-#8(3) = 545
+lseek(3) = 545
 read(3) = 512
 read(3) = 413
 close(3) = 0
 fstat(1) = 0
-Fri 09 Feb 2024 08:39:02 AM -03
+Fri 09 Feb 2024 09:50:35 AM -03
 write(1) = 32
 close(1) = 0
 close(2) = 0
