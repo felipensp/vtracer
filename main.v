@@ -11,6 +11,7 @@ fn find_syscall_64(syscall int) string {
 		3 { 'close' }
 		4 { 'stat' }
 		5 { 'fstat' }
+		8 { 'lseek' }
 		9 { 'mmap' }
 		10 { 'mprotect' }
 		11 { 'munmap' }
