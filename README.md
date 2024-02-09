@@ -1,5 +1,5 @@
 # vtracer
-Ptrace interface for tracing tools written in V
+Ptrace interface for writing tracing tools in V
 
 This project aims to provide an interface to who want write a tracing tool using ptrace in high level way.
 
