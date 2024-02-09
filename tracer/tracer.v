@@ -6,13 +6,13 @@ module tracer
 
 struct C.user_regs_struct {
 pub:
-	orig_rax i64
-	rax      i64
+	orig_rax i64 // syscall number
+	rax      i64 // ret
 	rbx      i64
 	rcx      i64
-	rdx      i64
-	rdi      i64
-	rsi      i64
+	rdi      i64 // 1st arg
+	rsi      i64 // 2nd arg
+	rdx      i64 // 3rd arg
 	r8       i64
 	r9       i64
 	r10      i64
