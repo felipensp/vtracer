@@ -5,6 +5,8 @@ This project aims to provide an interface to who want write a tracing tool using
 
 The `main.v` is a sample how to use the wrapper.
 
+_Work in progress state. Only Linux x86-64 support yet._
+
 ### Building
 
 `$ v .`
