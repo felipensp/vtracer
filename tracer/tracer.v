@@ -16,15 +16,24 @@ const ptrace_syscall = 24
 const ptrace_setoptions = 0x4200
 
 struct C.user_regs_struct {
+pub:
 	orig_rax i64
 	rax      i64
 	rbx      i64
 	rcx      i64
 	rdx      i64
 	rdi      i64
+	rsi      i64
+	r8       i64
+	r9       i64
+	r10      i64
 }
 
-// type UserRegs = C.user_regs_struct
+type UserRegs = C.user_regs_struct
+
+fn (u &UserRegs) str() string {
+	return 'regs {rdi: ${u.rdi.hex()}, rsi: ${u.rsi.hex()}, rdx: ${u.rdx.hex()}}'
+}
 
 fn C.ptrace(u64, u32, voidptr, voidptr) i64
 fn C.execv(&char, &&char) int
@@ -33,27 +42,10 @@ pub struct Ptracer {
 mut:
 	pid             int
 	syscall_tracing bool
-	syscall_64      map[int]string
+	syscall_hook    fn (int, UserRegs) = unsafe { nil }
 }
 
 pub fn (mut p Ptracer) init() {
-	p.syscall_64 = map[int]string{}
-	p.syscall_64[0] = 'read'
-	p.syscall_64[1] = 'write'
-	p.syscall_64[2] = 'open'
-	p.syscall_64[3] = 'close'
-	p.syscall_64[4] = 'stat'
-	p.syscall_64[5] = 'fstat'
-	p.syscall_64[9] = 'mmap'
-	p.syscall_64[10] = 'mprotect'
-	p.syscall_64[11] = 'munmap'
-	p.syscall_64[12] = 'brk'
-	p.syscall_64[13] = 'sigaction'
-	p.syscall_64[21] = 'access'
-	p.syscall_64[59] = 'execve'
-	p.syscall_64[60] = 'exit'
-	p.syscall_64[61] = 'wait4'
-	p.syscall_64[62] = 'kill'
 }
 
 pub fn (p &Ptracer) trace_me() i64 {
@@ -123,12 +115,12 @@ pub fn (mut p Ptracer) loop(child int) {
 	mut status := 0
 	mut in_call := 0
 
-	p.set_options(child, ptrace_o_exitkill)
+	p.set_options(child, tracer.ptrace_o_exitkill)
 
 	for {
 		p.syscall(child)
 		C.wait(&status)
-		if ((status) & 0xff) != 0x7f { // WIFSTOPPED
+		if (status & 0xff) != 0x7f { // WIFSTOPPED
 			break
 		}
 		signo := ((status & 0xff00) >> 8) // WSTOPSIG
@@ -140,19 +132,19 @@ pub fn (mut p Ptracer) loop(child int) {
 				p.cont(child, signo)
 				exit(1)
 			}
-			5 // SIGTRAP 
+			5 // SIGTRAP (syscall entry, syscall exit, child calls exec)
 			{
-				regs := p.get_regs(child)
-				if in_call == 0 {
-					if syscall := p.syscall_64[int(regs.orig_rax)] {
-						eprintln('>> ${syscall}')
+				if p.syscall_tracing {
+					if in_call == 0 {
+						regs := p.get_regs(child)
+						p.syscall_hook(int(regs.orig_rax), regs)
+						in_call = 1
+					} else {
+						in_call = 0
 					}
-					in_call = 1
-				} else {
-					in_call = 0
 				}
 			}
 			else {}
-		}		
+		}
 	}
 }
